@@ -1,259 +1,136 @@
-# Xenium Processor
+README
 
-A command-line tool for converting Xenium spatial transcriptomics data to a .GeoJSON file used in EscDat (MALDI-MSI and spatial transcriptomics overlay software). Generated file used in step 4 of EscDat. 
-This tool combines multiple processing steps into a single, easy-to-use script that automatically handles file discovery, data combination, and GeoJSON generation.
-The resulting .GeoJSON file contains the spatial single-cell information that contains: Cell_ID, Cluster, Gene counts per gene and Spatial coordinates. 
+### EscDat-Trans ###
 
+#Walk through/work flow
 
-DETAILED STEPS ON HOW TO RUN xenium_processor.py:
+"Software GUI buttons"
+
+-	Once a subprogram is started, the buttons on the main EscDatTrans interface will become unresponsive and the button of the running subprogram colors red. After successful completion of the subprogram, all buttons become responsive again and the finished subprogram button colors green. 
+-	If the main interface "freezes" because of an unforeseen error, the analysis can be continued by enabling all buttons again by clicking the "Unlock" button in the right lower corner.
 
 START
-1. Download xenium_processor.py (https://https://github.com/M4i-Imaging-Mass-Spectrometry/MALDI-MSI---Spatial-Transcriptomics-Overlay).
-2. Copy and paste xenium_processor.py to your xenium output folder. This is the folder that is often called (output-XET####) and contains the experiment.xenium file from your measurement.
-3. Open a terminal in the xenium output folder (right-click in an empty space, click "Open in terminal").
-4. Make sure you have the required packages installed (see requirements).
+"Choose Data"
+-	Start new analysis: Select the Bruker timsTOF.d base folder
+or 
+-	select an existing EscDat analysis folder: Select folder from existing 'analysis.d/EscDat' folder (select folder on date EscDat analysis)
 
-# The following is required to extract your full Xenium run
 
-5.. If you want to run xenium_processor.py, you need to write the following command line in the terminal: python xenium_processor.py "path/to/xenium/output"  
-KEEP IN MIND! That the "path/to/xenium/output" is not literally this text. Change it to the folder path where your 'experiment.xenium' is stored. You can do this by copying your path on the top of your windows explorer or right clicking on the folder and selecting 'Copy as Path'. Change backward slashes (\) to forward slashes (/). 
-IMPORTANT! your path needs to be in between quotation marks "". 
-6. Now press the "Enter"-key.
-7. The script automates a few steps and results in the following.
-	- Creates a new folder called: xenium_output
-	- Collects files from your output folder and places them in there
-	- Creates a .GeoJSON file named: combined.geojson which contains: Cell_ID, Cluster, Gene counts per gene and Spatial coordinates from each individual cell.
-	- This .GeoJSON file is used in the software called ESCDAT which allows for the overlay of timsTOF-MSI and Xenium Spatial Transcriptomics data.
+"Choose Optical Image"
+-	Select the (ome.)tiff optical (fluorescence) file (often found in "xenium output folder\morphology_focus\morphology_focus_0000.ome.tif")
+
+-	Select a resolution from "Resolutions in OME.TIF file" window, ideally a resolution matching your MSI image resolution and click 'OK'.
+
+
+"1. Create LowRes dataset"
+-	Start creation of full spatial resolution, low mass resolution datafile for use in step "2 data Explorer"
+
+
+"2. Data Explorer"
+-	Check 'Normalize' box if needed, normalization of the MSI data (spectral wise, the summed intensities per spectrum is constant) can give a better contrast in the image.
+
+-	Select m/z channel for representative image display by left mouseclick on a peak in the mass spectrum or input a m/z channel by hand in the M/Z field and press 'Plot' button. 
+
+You can move through m/z channels with 'previous'/'next' buttons
+'TIC' button to display TIC image
+You can change colour maps by right clicking on the scalebar and select 'standard colormaps', choose your prefered colormap.
+ 
+'Save image for EscDat Coregistration' will save the image in the analysis folder.
+
+-	To enhance contrast summation, a combination of m/z channels can be compiled by sequential selection of m/z channels followed by clicking 'Numerator' button for the first m/z channel and the '+' button for consecutive m/z channels. Using the 'Numerator' button again will reset the stored sequence.
+
+-	Adding m/z channels using the 'Denominator' button is also possible, '1' resets.
+Once the Numerator (and Denominator if needed) m/z channels are choosen, the 'Plot Ratio' button shows the resulting image.
+
+-	Click 'Save image for EscDat Coregistration' will save the image in the analysis folder.
+
+-	Closing the window automatically saves your selection.
+
+
+"3. Coregistration"
+-	Click 'Select Mass Image' to select the MSI image created in the previous step 'Data Explorer' (this file starts with 'Image_').
+
+-	Click 'Select ROI' and create a ROI on the image by clicking and dragging. Since the MSI image is most likely fully covered by the optical image, selecting the full image by dragging the anchor points to the edges on the ROI (blue lines) is advised.
+
+-	Double click in the ROI selection to save and close.
+
+-	Repeat 'Select ROI' in the Optical Image frame, select the appropriate ROI.
+
+-	Click 'HR Control Point Selection'
+
+-	Choose a grid cell in Microscope Image frame by clicking on it.
+
+-	Choose corresponding grid cell in MS Image frame.
+
+-	To be able to see the marks left by the MALDI laser ablation, the 'Upper Threshold' value has to be lowered to about 0.004, lower the value and click 'Refresh'.
+
+-	Click the + icon on the right top of the big black and white microscope Image to enable zooming.
+
+-	Zoom in Microscope Image to find fiducial marker points in laser ablation.
+
+-	Zoom in to MS Image to find corresponding MSI spectrum.
+
+-	Click 'Select point' under Microscope Image, input number of point to add and click on the marker point to store it.
+
+-	Click 'Select point' under MS Image, input number of point to add (same as corresponding Microscope Image point) and click on the marker point to store it.
+
+-	Repeat for all registration points. ( choose minimum of 4 registration points)
+
+-	The background image in the MS Image can be set to a specific m/z channel if needed by clicking on the appropriate m/z channel in the spectrum on the lower right.
+
+-	An individual MS spectrum can be viewed for inspection by clicking on the 'Spectrum' button and clicking on a spectrum position in the MS Image.
+
+-	To select the next block in the grid on the left first deactivate zoom or panning in the top right popup in any of the images.
+
+-	Repeat above procedure until all registration points are set.
+
+-	Close registration tool
+
+-	In the 'Registration' frame select the desired transformation type.
+
+-	Click 'Coregister' button
+
+The Registration Result Overlay will be drawn on the screen, select a grid cell to display in detail, turn zoom on and off by toggling the 'Zoom on' tick box.
+
+If the result of the registration is as desired close the ECoRegT interface, if not: add or replace registration points by clicking 'HR Control Point Selection' again.
+
+If you want to continue from a previous overlay, press "Load and adapt previous registration points".
+
+
+"4 10X Xenium Explorer ROI selection"
+-	In this step, you need to run  a different python script separately. Please check "https://github.com/M4i-Imaging-Mass-Spectrometry/MALDI-MSI---Spatial-Transcriptomics-Overlay" for the aforementioned python script.
+The script creates a .geojson file containing "cell_id, cluster, gene transcript and spatial coordinates" which can be read in step number 5. 
+
+
+"5 Create HR ROI dataset"
+-	This software overlays the cell coordinates (detected in the Xenium Explorer software and exported using the provided Python script) with the MSI data and extracts the high resolution mass spectrum for each cell. MSI spectra are weighed by the amount of overlap. The cell cluster as assigned in the Xenium Explorer software is also stored.
+
+The default settings should suffice:
+Number of closest pixels: Maximum number of pixels to take into account per cell
+Minimal coverage per MSI pixel(%): Only include spectra from pixels that have a minimal overlap of the given percentage. A value of 100% will only include pixels that are fully covered by the cell circumference.
+GeoJSON um per pixel: The GeoJSON data is represented in um, this has to be expressed in pixels. Optical resolution of the Optical image (um per pixel), in our case always 0.2125 um/pixel (This is based on the optical resolution on the Xenium Microscope). 
+% data to use for peakpicking: Once the extraction of the spectra starts, a full resolution mass spectrum is created that is used for the extraction of peak apex and peak windows. The resulting peaklist is used to extract the high mass resolution spectra for all cells.
+To increase the speed of the process one may choose to only use a percentage of the full dataset to create the full resolution mass spectrum.
+
+-	Click the 'Peakpick combined ROIS and Create EscDatResult.csv file'
+PEAPI Peackpicking interface will be shown
+
+- 	Click 'Pick!' button
+The detected peaks will be displayed, zoom in to check quality. The top graph shows the peak apex (blue dotted line) and integration window (small black lines), the lower graph the integration result. The number of peaks can be limited by increasing the 'Threshold' value.
+Peak detection in the high m/z region can be enhanced by changing the 'Boost high masses' value, a number >1 will linearly multiply the m/z intensities by 1 for the first m/z channel to 'number' by the last m/z channel. e1,e2 will multiply by e^1,e^2 etc.
+
+-	Once satisfied with the result, click 'Save and Continue' to start data extraction.
+
 STOP
 
-# The following is required if you want to work with a selection of the cells, instead of all cells that are measured in your Xenium analysis.
-
-8. In Xenium Explorer, select your cells, albeit using an ROI or cluster or a single cell.
-9. In Xenium explorer, click 'Cells' in the selection window. Press the three vertical dots (...) in the same line as 'Cell Stats'.
-10. Click 'Download Cell Stats as .csv'
-11. Rename your .csv to e.g, selected_cells.csv and copy it to your xenium output folder.
-12. Delete the first two rows in the .csv file.
-13. Open a new terminal in your xenium output folder.
-14. In your terminal window, you now need to run the following command line: python xenium_processor.py "path/to/xenium/output" --filter "path/to/xenium/output/selected_cells.csv"
-IMPORTANT! Keep the quotation marks in mind and also the name of your .csv file!
-15. The script automates a few steps and results in the following.
-	- Creates a new folder called: xenium_output
-	- Collects files from your output folder and places them in there
-	- Creates a .GeoJSON file named: filtered.geojson which contains: Cell_ID, Cluster, Gene counts per gene and Spatial coordinates from each individual cell that you selected.
-	- This .GeoJSON file is used in the software called ESCDAT which allows for the overlay of timsTOF-MSI and Xenium Spatial Transcriptomics data.
-STOP
-
-
-## Requirements to run xenium_processor.py
-
-- Python 3.7+
-
-- Required packages:
-
-numpy
-pandas
-zarr
-
-To install:
-  ```bash
-  py -m pip install numpy pandas zarr
-  ```
-
-## Installation of xenium_processor.py
-
-Download the `xenium_processor.py` script to your local machine. No installation needed!
-
-```bash
-# Download the script from:
-wget https://https://github.com/M4i-Imaging-Mass-Spectrometry/MALDI-MSI---Spatial-Transcriptomics-Overlay
-
-# Or just copy the file to your working directory (xenium/output/folder) if you already have it downloaded.
-```
-
-## Basic Usage
-Open terminal in your Xenium output folder and run:
-
-### Process entire Xenium dataset
-```bash
-python xenium_processor.py "/path/to/xenium/output/folder"
-```
-
-### With cell filtering
-```bash
-python xenium_processor.py "/path/to/xenium/folder" --filter "selected_cells.csv"
-```
-
-"selected_cells.csv" is the file you generate when you select a ROI in Xenium Explorer.
-
-### Custom output directory
-```bash
-python xenium_processor.py "/path/to/xenium/folder" --output "./my_analysis"
-```
-
-## Input Files
-
-The script automatically searches for these required files anywhere in your Xenium output folder:
-
-| File | Description | Common Locations |
-|------|-------------|------------------|
-| `cell_feature_matrix.zarr.zip` | Compressed gene expression matrix | Root folder |
-| `cell_boundaries.csv` or `.csv.gz` | Cell polygon coordinates | `/analysis/` folder |
-| `clusters.csv` | Cell cluster assignments | `/analysis/clustering/gene_expression_graphclust/` |
-| `features.tsv.gz` | Gene feature list | `/cell_feature_matrix/` |
-
-**Note**: The script searches recursively, so files can be anywhere in the directory tree.
-
-## Output Files
-
-All outputs are saved to `./xenium_output/` (or your specified output directory):
-
-| File | Description |
-|------|-------------|
-| `combined.csv` | Master dataset with all cell data |
-| `combined.geojson` | Spatial visualization file for full dataset |
-| `filtered_cells.csv` | Subset of cells (if --filter used) |
-| `filtered_cells.geojson` | Spatial visualization for filtered cells |
-
-### Combined.csv Structure
-- **Barcode**: Unique cell identifier
-- **Cluster**: Cluster assignment
-- **Gene columns**: Expression count for each gene
-- **Total**: Sum of all transcripts
-- **x1-x25, y1-y25**: Cell boundary coordinates (up to 25 vertices)
-
-## Cell Filtering
-
-To analyze specific cell populations:
-
-1. Create a CSV file with cell IDs in one of these formats:
-   - Column named `cell_id`
-   - Column named `Barcode`
-   - First column (if no headers match)
-
-2. Run with the `--filter` flag:
-   ```bash
-   python xenium_processor.py "/xenium/data" --filter "selected_cells.csv"
-   ```
-
-Example filter file:
-```csv
-Barcode
-aaaiflmn-1
-aaanapee-1
-aaapcdjl-1
-aabmdjhc-1
-aacgbgnk-1
-aacgoeoa-1
-aacnhgpe-1
-```
-
-## Script Workflow Details
-
-### Step 1: File Discovery
-- Recursively searches the input folder
-- Identifies all required files automatically
-- Handles both compressed (.gz) and uncompressed files
-
-### Step 2: Zarr Processing
-- Reads sparse expression matrix
-- Converts to dense format
-- Outputs: `gene_features.csv`
-
-### Step 3: Data Combination
-- Merges expression data with spatial coordinates
-- Adds cluster assignments
-- Removes unassigned cells
-- Pads coordinate arrays to uniform size (25 vertices)
-- Outputs: `combined.csv`
-
-### Step 4: GeoJSON Creation
-- Converts tabular data to GeoJSON format
-- Creates polygon features for each cell
-- Includes all expression data as properties
-- Outputs: `combined.geojson`
-
-## Troubleshooting
-
-### "Missing required files" error
-- Ensure all 4 required files are present in the Xenium output folder
-- Check that file names match exactly (case-sensitive on Linux/Mac)
-- Verify `.gz` files aren't corrupted
-
-### Multiple files found warning
-- The script will automatically choose the most likely file
-- For `clusters.csv`, it prefers files in `gene_expression_graphclust` folders
-
-
-## Example Workflow
-
-```bash
-# 1. Basic processing
-python xenium_processor.py "/path/to/xenium/folder"
-
-# 2. Check the outputs
-ls xenium_output/
-# combined.csv  combined.geojson  gene_features.csv
-
-# 3. Filter for specific cells
-python xenium_processor.py "/path/to/xenium/folder" --filter "selected_cells.csv"
-
-# 4. Load in GeoJSON viewer
-# Open combined.geojson in QGIS, geojson.io, text editor, or custom viewer
-```
-
-## Limitations
-
-- Maximum 25 vertices per cell polygon (additional vertices are truncated)
-- Requires all 4 input files to be present
-- Memory usage scales with dataset size
-
-## Citation
-
-If you use this tool in your research, please cite the paper:
-One Section, Two Worlds: Single-Cell Integration of MALDI-MSI and Spatial Transcriptomics on the Same Tissue Section
-
-DOI: ###
-
-## Support
-
-For issues or questions:
-1. Check that all input files are present
-2. Verify Python package versions
-3. Review error messages for specific missing files
-4. Ensure sufficient disk space for outputs
-
----
-
-DETAILED STEPS ON HOW TO RUN xenium_processor.py:
-
-1. Download xenium_processor.py (https://https://github.com/M4i-Imaging-Mass-Spectrometry/MALDI-MSI---Spatial-Transcriptomics-Overlay).
-2. Copy and paste xenium_processor.py to your xenium output folder. This is the folder that is often called (output-XET####) and contains the experiment.xenium file from your measurement.
-3. Open a terminal in the xenium output folder (right-click in an empty space, click "Open in terminal".
-4. If you want to run xenium_processor.py you need to write the following command line in the terminal: python xenium_processor.py "path/to/xenium/output"  
-KEEP IN MIND! That the "path/to/xenium/output" is not literally this text. Change it to the path where your xenium.experiment is stored. You can do this by copying your path on the top of your windows explorer. 
-IMPORTANT! your path needs to be in between quotation marks "". 
-5. Now press the "Enter"-key.
-6. The script automates a few steps and results in the following.
-	- Creates a new folder called: xenium_output
-	- Collects files from your output folder and places them in there
-	- Creates a .GeoJSON file named: combined.geojson which contains: Cell_ID, Cluster, Gene counts per gene and Spatial coordinates from each individual cell.
-7. This file is used in the software called ESCDAT which allows for the overlay of timsTOF-MSI and Xenium Spatial Transcriptomics data.
-
-!	The following is required if you want to work with a selection of the cells, instead of all cells that are measured in your Xenium analysis.
-
-8. In Xenium Explorer, select your cells, albeit using an ROI or cluster or a single cell.
-9. In Xenium explorer, click "Cells" in the selection window. Press the three vertical dots (...) in the same line as "Cell Stats".
-10. Click "Download Cell Stats as .csv
-11. Rename your .csv to e.g, selected_cells.csv and copy it to your xenium output folder.
-12. Open a new terminal in your xenium output folder.
-13. In your terminal window, you now need to run the following command line: python xenium_processor.py "path/to/xenium/output" --filter "path/to/xenium/output/selected_cells.csv"
-IMPORTANT! Keep the quotation marks in mind and also the name of your .csv file!
-14. The script automates a few steps and results in the following.
-	- Creates a new folder called: xenium_output
-	- Collects files from your output folder and places them in there
-	- Creates a .GeoJSON file named: filtered.geojson which contains: Cell_ID, Cluster, Gene counts per gene and Spatial coordinates from each individual cell that you selected.
-15. This file is used in the software called ESCDAT which allows for the overlay of timsTOF-MSI and Xenium Spatial Transcriptomics data.
+RESULTING OUTPUT:
+EscDatResult_Cell_With_Nucleus_30_0_10-Jul-2025_15-09-14.csv" (for general statistical analysis) NOTE: GF (Gene Features) are ranked in the final .csv files in alphabetical order.
+EscDatResult_Seurat_Cell_With_Nucleus_30_0_10-Jul-2025_15-09-14.csv" (for Seurat based statistical analysis)
+EscDatResult_summary_Cell_With_Nucleus_30_0_10-Jul-2025_15-09-14.csv" (generic summary file)
+ROIspectra_Cell_With_Nucleus_30_0_10-Jul-2025_15-09-14.mat" (for Matlab based analysis)
 
 
 
 
+
+ 
