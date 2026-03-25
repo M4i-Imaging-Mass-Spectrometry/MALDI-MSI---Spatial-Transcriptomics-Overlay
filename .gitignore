@@ -1,2 +1,7 @@
-Test Data - Mouse/*
-EscDat/EscDatTrans_P2_Installer.exe
+.venv/
+.venv-hpc/
+__pycache__/
+.pytest_cache/
+.DS_Store
+debug_data/
+xenium_output*/
