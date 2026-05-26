@@ -518,6 +518,7 @@ def run_geojson_maker(
         col for col in df.columns
         if col not in {"Barcode", "Cluster", "Total"} and col not in coordinate_columns
     ]
+    has_total = "Total" in df.columns
 
     geojson = {
         "type": "FeatureCollection",
@@ -546,7 +547,7 @@ def run_geojson_maker(
                 "CellID": row["Barcode"],
                 "Z": row["Cluster"],
                 "GeneFeatures": [row[col] for col in gene_feature_columns],
-                "TotalFeatures": row["Total"],
+                "TotalFeatures": row["Total"] if has_total else None,
             },
         }
         geojson["features"].append(cell)
@@ -575,6 +576,14 @@ def run_filter(work_dir: Path, filter_file: str | Path) -> str:
 
 
 def main():
+    for stream in (sys.stdout, sys.stderr):
+        reconfigure = getattr(stream, "reconfigure", None)
+        if reconfigure is not None:
+            try:
+                reconfigure(encoding="utf-8")
+            except (OSError, ValueError):
+                pass
+
     parser = argparse.ArgumentParser(
         description="Process Xenium spatial transcriptomics data",
         formatter_class=argparse.RawDescriptionHelpFormatter,

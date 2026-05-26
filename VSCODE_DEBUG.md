@@ -2,28 +2,22 @@
 
 ## Quick start
 
-1. Open the repository root in VS Code.
-2. Run the `Prepare debug environment` task once.
-3. Press `F5` and choose one of these launch profiles:
-   - `xenium_processor: sample dataset`
-   - `xenium_processor: sample dataset with filter`
+From the repository root:
 
-## What the setup does
+```bash
+python -m venv .venv
+.venv/Scripts/activate          # Windows
+# or: source .venv/bin/activate  # macOS / Linux
+python -m pip install -r requirements.txt
+python tools/create_debug_dataset.py
+python "Python Scripts/xenium_processor.py" debug_data/sample_xenium --output debug_data/xenium_output
+```
 
-- Creates a local `.venv` using Python 3.13
-- Installs the project dependencies from `requirements.txt`
-- Generates a small synthetic Xenium-style dataset under `debug_data/`
-- Launches `Python Scripts/xenium_processor.py` against that dataset
+To debug inside VS Code, open the repository, select the `.venv` interpreter, and either run the commands above in the integrated terminal or create your own `.vscode/launch.json` profile pointing at `Python Scripts/xenium_processor.py` with arguments such as `debug_data/sample_xenium --output debug_data/xenium_output`.
 
 ## Real data
 
-To debug with an actual Xenium export, duplicate one of the launch profiles in `.vscode/launch.json` and replace:
-
-- `${workspaceFolder}/debug_data/sample_xenium`
-- `${workspaceFolder}/debug_data/selected_cells.csv`
-- `${workspaceFolder}/debug_data/xenium_output`
-
-with your own dataset and output paths.
+To debug with an actual Xenium export, point the script at your own dataset and output directory, optionally adding `--filter <selected_cells.csv>`.
 
 ## Large real datasets
 
