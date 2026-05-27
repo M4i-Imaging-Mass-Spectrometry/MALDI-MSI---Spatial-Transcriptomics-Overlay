@@ -239,7 +239,34 @@ def load_feature_metadata(xenium_files: dict[str, Path]) -> tuple[list[int], lis
     return list(range(len(gene_names))), deduplicate_names(gene_names)
 
 
-def choose_polygon_group(polygon_sets: zarr.hierarchy.Group) -> zarr.hierarchy.Group:
+def open_zarr_path(path: str | Path):
+    """Open a zarr group from either a directory or a ``.zip`` archive.
+
+    Bridges the zarr v2 to v3 API change: v2's ``zarr.open()`` auto-detected
+    ``.zip`` paths and used a ``ZipStore`` internally, while v3 treats the
+    path as a local directory and raises ``GroupNotFoundError`` on a zipped
+    archive. We open the ``ZipStore`` explicitly so both versions work, and
+    request ``zarr_format=2`` on v3 to read the Xenium v2-layout archive
+    through v3's compatibility layer.
+    """
+    path = Path(path)
+    is_zarr_v3 = int(zarr.__version__.split(".", 1)[0]) >= 3
+
+    if path.suffix == ".zip":
+        if is_zarr_v3:
+            from zarr.storage import ZipStore
+        else:
+            from zarr import ZipStore
+        store = ZipStore(str(path), mode="r")
+    else:
+        store = str(path)
+
+    if is_zarr_v3:
+        return zarr.open(store, mode="r", zarr_format=2)
+    return zarr.open(store, mode="r")
+
+
+def choose_polygon_group(polygon_sets):
     """Prefer the full cell boundary polygon set when multiple sets exist."""
     if "1" in polygon_sets:
         return polygon_sets["1"]
@@ -256,7 +283,7 @@ def write_boundaries_from_polygon_sets(
     selected_barcodes: list[str] | None = None,
 ) -> None:
     """Materialize cell boundaries from the local Xenium zarr tree."""
-    root = zarr.open(Path(root_path), mode="r")
+    root = open_zarr_path(root_path)
     polygon_group = choose_polygon_group(root["polygon_sets"])
 
     all_cell_ids = normalize_cell_ids(np.array(root["cell_id"]))
@@ -344,9 +371,9 @@ def prepare_working_directory(
 def open_cell_feature_group(xenium_files: dict[str, Path]):
     """Open the sparse cell-feature matrix from either a zarr directory or zipped zarr."""
     if "cell_features_dir" in xenium_files:
-        return zarr.open(xenium_files["cell_features_dir"], mode="r")
+        return open_zarr_path(xenium_files["cell_features_dir"])
 
-    result = zarr.open(xenium_files["zarr"], mode="r")
+    result = open_zarr_path(xenium_files["zarr"])
     if hasattr(result, "keys") and "cell_features" in result:
         return result["cell_features"]
     return result.cell_features
